@@ -10,8 +10,9 @@ if [ "$#" -ne 1 ]; then
 fi
 
 CONTAINER_NAME=$1
-ROSDISTRO=foxy
 LXC_IMAGE=ubuntu:20.04
+ROSDISTRO=foxy
+IGNDISTRO=edifice
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
 echo "### Creating ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
@@ -35,3 +36,15 @@ lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_D
 
 echo "### Running install_ros.sh on the container. Takes about 30 minutes."
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
+
+# Push the IGN setup script.
+echo "### Pushing IGN setup script."
+lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
+
+echo "### Running install_ign.sh on the container."
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ign.sh ${IGNDISTRO}"
+
+# Tools we'll need to install graphics drivers in the container.
+echo "### Installing ubuntu-drivers-common."
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt install ubuntu-drivers-common"
+
