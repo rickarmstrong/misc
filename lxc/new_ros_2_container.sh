@@ -46,5 +46,5 @@ lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu
 
 # Tools we'll need to install graphics drivers in the container.
 echo "### Installing ubuntu-drivers-common."
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt install ubuntu-drivers-common"
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt install ubuntu-drivers-common -y"
 
