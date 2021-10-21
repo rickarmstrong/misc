@@ -39,7 +39,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 CONTAINER_NAME=$1
-LXC_IMAGE=ubuntu:20.04
+LXC_IMAGE=e5b4b406f66e
 ROSDISTRO=foxy
 IGNDISTRO=edifice
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
@@ -59,14 +59,12 @@ lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt upd
 echo "### 'Doing apt upgrade'"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt upgrade -y"
 
-# Push the ROS setup script.
 echo "### Pushing ROS setup script."
 lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
 
 echo "### Running install_ros.sh on the container. Takes about 30 minutes."
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
 
-# Push the IGN setup script.
 echo "### Pushing IGN setup script."
 lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
 
