@@ -39,9 +39,9 @@ if [ "$#" -ne 1 ]; then
 fi
 
 CONTAINER_NAME=$1
-LXC_IMAGE=e5b4b406f66e
+LXC_IMAGE=ubuntu:20.04  # focal
 ROSDISTRO=foxy
-IGNDISTRO=edifice
+IGNDISTRO=fortress
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
 echo "### Creating ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
@@ -49,7 +49,7 @@ lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile gui
 sleep 5
 
 echo "### Disabling unattended/auto upgrades and rebooting..."
-lxc file push ./resources/20auto-upgrades ${CONTAINER_NAME}/etc/apt/apt.conf.d/20auto-upgrades-test -p --mode 644 --uid 0 --gid 0
+lxc file push ./resources/20auto-upgrades ${CONTAINER_NAME}/etc/apt/apt.conf.d/20auto-upgrades -p --mode 644 --uid 0 --gid 0
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo reboot"
 sleep 5
 
