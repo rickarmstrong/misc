@@ -1,7 +1,7 @@
 #!/bin/bash
 # BSD 3-Clause License
 #
-# Copyright (c) 2012, Rick Armstrong
+# Copyright (c) 2021, Rick Armstrong
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,38 +39,55 @@ if [ "$#" -ne 1 ]; then
 fi
 
 CONTAINER_NAME=$1
+GRAPHICS_CARD=gt1060
 LXC_IMAGE=ubuntu:20.04  # focal
 ROSDISTRO=foxy
 IGNDISTRO=fortress
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
+echo "###"
 echo "### Creating ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
-lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile gui
+echo "###"
+lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile x11
+sleep 10  # Wait for boot to completely finish so our user account will exist.
+
+echo "###"
+echo "### Waiting for LXD cloud-init to finish."
+echo "###"
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "cloud-init status --wait"
 sleep 5
 
-echo "### Disabling unattended/auto upgrades and rebooting..."
+echo "###"
+echo "### Disabling unattended/auto upgrades, and rebooting..."
+echo "###"
 lxc file push ./resources/20auto-upgrades ${CONTAINER_NAME}/etc/apt/apt.conf.d/20auto-upgrades -p --mode 644 --uid 0 --gid 0
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo reboot"
 sleep 5
 
-# Do a manual upgrade.
+# We disabled auto-upgrades, so do a manual upgrade on the new container.
+echo "###"
 echo "### Doing 'apt update'."
+echo "###"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt update"
+
+echo "###"
 echo "### 'Doing apt upgrade'"
+echo "###"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt upgrade -y"
 
-echo "### Pushing ROS setup script."
-lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "export DISPLAY=:0; glxgears"
 
-echo "### Running install_ros.sh on the container. Takes about 30 minutes."
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
+echo "Done."
 
-echo "### Pushing IGN setup script."
-lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
 
-echo "### Running install_ign.sh on the container."
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ign.sh ${IGNDISTRO}"
-
-# Tools we'll need to install graphics drivers in the container.
-echo "### Installing ubuntu-drivers-common."
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt install ubuntu-drivers-common -y"
+#echo "### Pushing ROS setup script."
+#lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
+#
+#echo "### Running install_ros.sh on the container. Takes about 30 minutes."
+#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
+#
+#echo "### Pushing IGN setup script."
+#lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
+#
+#echo "### Running install_ign.sh on the container."
+#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ign.sh ${IGNDISTRO}"
