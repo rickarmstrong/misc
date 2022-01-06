@@ -17,7 +17,7 @@ devices:
 #     bind: container
 #     connect: unix:/run/user/1000/pulse/native
 #     gid: "1000"
-#     listen: unix:/home/ubuntu/pulse-native
+#     listen: unix:/home/ubuntuhttps://www.ifish.net/board/forumdisplay.php?f=9/pulse-native
 #     mode: "0777"
 #     security.gid: "1000"
 #     security.uid: "1000"
