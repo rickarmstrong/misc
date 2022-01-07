@@ -74,19 +74,8 @@ echo "### 'Doing apt upgrade'"
 echo "###"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt upgrade -y"
 
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "export DISPLAY=:0; glxgears"
+echo "### Pushing ROS setup script."
+lxc file push ./resources/install_ros_1.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_1.sh -p
 
-echo "Done."
-
-
-#echo "### Pushing ROS setup script."
-#lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
-#
-#echo "### Running install_ros.sh on the container. Takes about 30 minutes."
-#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
-#
-#echo "### Pushing IGN setup script."
-#lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
-#
-#echo "### Running install_ign.sh on the container."
-#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ign.sh ${IGNDISTRO}"
+echo "### Running install_ros_1.sh on the container. Takes about 40 minutes."
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_1.sh ${ROSDISTRO}"

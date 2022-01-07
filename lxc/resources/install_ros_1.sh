@@ -9,3 +9,6 @@ sudo apt install -y ros-noetic-desktop-full
 sudo apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
 rosdep update
+
+# For gui tools like gazebo.
+echo "export DISPLAY=:0" >> ~/.bashrc
