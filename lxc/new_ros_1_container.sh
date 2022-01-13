@@ -40,13 +40,21 @@ fi
 
 CONTAINER_NAME=$1
 LXC_IMAGE=ubuntu:20.04  # focal
+LXC_PROFILE_NAME="`date +%Y%m%d%H%M%S`.X11.profile"
 ROSDISTRO=noetic
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
 echo "###"
+echo "### Creating a new LXC profile."
+echo "###"
+# Read in our profile template, edit, import it to LXC.
+lxc profile create ${LXC_PROFILE_NAME}
+sed "s/{{ gid }}/`id -u`/g" resources/x11.profile.in | sed "s/{{ uid }}/`id -g`/g" | lxc profile edit ${LXC_PROFILE_NAME}
+
+echo "###"
 echo "### Creating ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
 echo "###"
-lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile x11
+lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile ${LXC_PROFILE_NAME}
 sleep 10  # Wait for boot to completely finish so our user account will exist.
 
 echo "###"
@@ -78,3 +86,5 @@ lxc file push ./resources/install_ros_1.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_D
 
 echo "### Running install_ros_1.sh on the container. Takes about 40 minutes."
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_1.sh ${ROSDISTRO}"
+
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "gazebo"
