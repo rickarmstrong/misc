@@ -40,8 +40,7 @@ fi
 
 CONTAINER_NAME=$1
 LXC_IMAGE=ubuntu:20.04  # focal
-ROSDISTRO=foxy
-IGNDISTRO=fortress
+ROSDISTRO=noetic
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
 echo "###"
