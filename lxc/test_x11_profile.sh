@@ -61,6 +61,11 @@ echo "###"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "cloud-init status --wait"
 sleep 5
 
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "export DISPLAY=:0; glxgears"
+echo "###"
+echo "### Setting DISPLAY and starting glxgears app."
+echo "###"
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'echo "export DISPLAY=:0" >> /home/ubuntu/.bashrc'
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'glxgears'
+
 
 echo "Done."
