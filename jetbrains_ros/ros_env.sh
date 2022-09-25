@@ -1,7 +1,6 @@
 #!/bin/bash
 # NOTE: you shouldn't call this script, you should source it. This script
-# assumes that you've created a Catkin worspace somewhere that points back
-# to this ROS package.
+# assumes that this directory is in the top-level dir of a working Catkin workspace.
 
 . ${HOME}/.bashrc
 
@@ -12,14 +11,13 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" > /dev/null
 IFS='/' read -r -a tokens <<< `find /opt/ros -name env.sh`
 DISTRO=${tokens[3]}
 
-# Setup the base ROS environment.
+# Source the base ROS environment.
 . /opt/ros/${DISTRO}/setup.bash
 
-# Load this project's environment.
-CATKIN_WS=../../cmd_vel_filter_ws
-. ${CATKIN_WS}/devel/setup.bash
+# Load this workspace's environment.
+. ../devel/setup.bash
 
-# Activate our virtualenv.
-. ~/venv/cmd_vel_filter/bin/activate
+# Uncomment this if you want to activate a virtualenv.
+# . ~/venv/cmd_vel_filter/bin/activate
 
 export ROS_MASTER_URI=http://127.0.0.1:11311
