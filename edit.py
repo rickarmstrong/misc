@@ -1,5 +1,6 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 import os, sys, subprocess, getpass, stat, shutil
+from encodings.cp866 import encoding_map
 
 editor = 'nano'
 dataFile = sys.argv[1]
@@ -33,7 +34,7 @@ try:
     tmpFile = os.path.join(tmpDir, 'data')
     cmd = "gpg -d --batch --ignore-mdc-error --passphrase-fd 0 --output %s %s" % (tmpFile, dataFile)
     proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE)
-    proc.stdin.write(passwd)
+    proc.stdin.write(bytes(passwd, encoding='utf-8'))
     proc.stdin.close()
     if proc.wait() != 0:
         raise Exception("Error decrypting file.")
@@ -52,7 +53,7 @@ try:
     ## re-encrypt, write back to original file
     cmd = "gpg --yes --batch --symmetric --passphrase-fd 0 --output %s %s" % (dataFile, tmpFile)
     proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE)
-    proc.stdin.write(passwd)
+    proc.stdin.write(bytes(passwd, encoding='utf-8'))
     proc.stdin.close()
     if proc.wait() != 0:
         raise Exception("Error encrypting file.")
@@ -60,7 +61,7 @@ except:
     ## If there was an error AND the data file was modified, restore the backup.
     dstat2 = os.stat(dataFile)
     if dstat.st_mtime != dstat2.st_mtime or dstat.st_size != dstat2.st_size:
-        print "Error occurred, restored encrypted file from backup."
+        print("Error occurred, restored encrypted file from backup.")
         shutil.copy(bakFile, dataFile)
     raise
 finally:
