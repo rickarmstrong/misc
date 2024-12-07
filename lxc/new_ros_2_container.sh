@@ -39,9 +39,8 @@ if [ "$#" -ne 1 ]; then
 fi
 
 CONTAINER_NAME=$1
-LXC_IMAGE=ubuntu:20.04  # focal
-ROSDISTRO=foxy
-IGNDISTRO=fortress
+LXC_IMAGE=ubuntu:c15fcb01a6eb  # 22.04 jammy
+ROSDISTRO=humble
 CONTAINER_SCRIPT_DIR=/home/ubuntu/src
 
 echo "###"
@@ -57,11 +56,19 @@ lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "cloud-init s
 sleep 5
 
 echo "###"
+echo "### Setting X DISPLAY in .bashrc."
+echo "###"
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'echo '"export DISPLAY=${DISPLAY}"' >> /home/ubuntu/.bashrc'
+
+echo "### Pushing /etc/needrestart/conf.d/no-prompt.conf."
+lxc file push ./resources/no-prompt.conf ${CONTAINER_NAME}/etc/needrestart/conf.d/no-prompt.conf
+
+echo "###"
 echo "### Disabling unattended/auto upgrades, and rebooting..."
 echo "###"
 lxc file push ./resources/20auto-upgrades ${CONTAINER_NAME}/etc/apt/apt.conf.d/20auto-upgrades -p --mode 644 --uid 0 --gid 0
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo reboot"
-sleep 5
+sleep 10
 
 # We disabled auto-upgrades, so do a manual upgrade on the new container.
 echo "###"
@@ -74,19 +81,8 @@ echo "### 'Doing apt upgrade'"
 echo "###"
 lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "sudo apt upgrade -y"
 
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "export DISPLAY=:0; glxgears"
+echo "### Pushing ROS setup script."
+lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
 
-echo "Done."
-
-
-#echo "### Pushing ROS setup script."
-#lxc file push ./resources/install_ros_2.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ros_2.sh -p
-#
-#echo "### Running install_ros.sh on the container. Takes about 30 minutes."
-#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO}"
-#
-#echo "### Pushing IGN setup script."
-#lxc file push ./resources/install_ign.sh ${CONTAINER_NAME}${CONTAINER_SCRIPT_DIR}/install_ign.sh -p
-#
-#echo "### Running install_ign.sh on the container."
-#lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ign.sh ${IGNDISTRO}"
+echo "### Running install_ros.sh on the container."
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "/home/ubuntu/src/install_ros_2.sh ${ROSDISTRO} ${DISPLAY}"

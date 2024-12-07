@@ -29,28 +29,22 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if [ "$#" -ne 1 ]; then
-	echo "Usage: `basename "$0"` CONTAINER_NAME"
-    echo
-	echo "Build an LXC container with ROS 2 installed. Example"
-	echo "./`basename "$0"`.sh ros-test"
-    echo
-	exit
-fi
-
-CONTAINER_NAME=$1
-LXC_IMAGE=ubuntu:20.04  # focal
+##############################################################################
+# Verify that we can run a GUI application in an LXC container on this host.
+# This is useful on a fresh OS install, as a smoke test to verify that we have
+# it setup correctly to run stuff like Gazebo, RVIZ, etc.
+##############################################################################
+CONTAINER_NAME=tempcontainer
+LXC_IMAGE=ubuntu:22.04
 LXC_PROFILE_NAME="`date +%Y%m%d%H%M%S`.X11.profile"
 
 echo "###"
-echo "### Creating a new LXC profile."
+echo "### Creating lxc GUI profile ${LXC_PROFILE_NAME}"
 echo "###"
-# Read in our profile template, edit, import it to LXC.
-lxc profile create ${LXC_PROFILE_NAME}
-sed "s/{{ gid }}/`id -u`/g" resources/x11.profile.in | sed "s/{{ uid }}/`id -g`/g" | lxc profile edit ${LXC_PROFILE_NAME}
+source ./create_x11_profile.sh $LXC_PROFILE_NAME
 
 echo "###"
-echo "### Creating ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
+echo "### Creating temporary container named ${CONTAINER_NAME} from lxc image: ${LXC_IMAGE}"
 echo "###"
 lxc launch ${LXC_IMAGE} ${CONTAINER_NAME} --profile default --profile ${LXC_PROFILE_NAME}
 sleep 10  # Wait for boot to completely finish so our user account will exist.
@@ -62,10 +56,18 @@ lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc "cloud-init s
 sleep 5
 
 echo "###"
-echo "### Setting DISPLAY and starting glxgears app."
+echo "### Starting glxgears. You should see...gears. :)"
 echo "###"
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'echo "export DISPLAY=:0" >> /home/ubuntu/.bashrc'
-lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'glxgears'
+lxc exec ${CONTAINER_NAME} -- sudo --login --user ubuntu bash -ilc 'export DISPLAY='"${DISPLAY}"';glxgears'
 
+echo "###"
+echo "### Cleanup: deleting container ${CONTAINER_NAME}."
+echo "###"
+lxc delete -f ${CONTAINER_NAME}
+
+echo "###"
+echo "### Cleanup: deleting profile ${LXC_PROFILE_NAME}."
+echo "###"
+lxc profile delete ${LXC_PROFILE_NAME}
 
 echo "Done."

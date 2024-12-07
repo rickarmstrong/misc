@@ -1,5 +1,10 @@
 ## Scripts for standing-up new LXC containers.
 
+### new_ros_2_container.sh
+Assumes we've already created an LXC GUI profile using `create_x11_profile.sh`. Creates a new container,
+does a bunch of administrative stuff, copies a ROS 2 install script to the container, and kicks it off.
+Takes about 7 minutes, on my machine.
+
 ### test_x11_profile.sh
 
 This one is a smoke test that to see if the x11 LXD profile is going to 

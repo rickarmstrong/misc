@@ -1,15 +1,16 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-	echo "Usage: `basename "$0"` ROSDISTRO"
+if [ "$#" -ne 2 ]; then
+	echo "Usage: `basename "$0"` ROSDISTRO XDISPLAY"
     echo
 	echo "Install ROS 2. Example:"
-	echo "./`basename "$0"` foxy"
+	echo "./`basename "$0"` humble :0"
     echo
 	exit
 fi
 
 ROSDISTRO=$1
+XDISPLAY=$2
 
 # ROS 2
 sudo apt install curl gnupg2 lsb-release -y
@@ -34,5 +35,8 @@ echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
 # DDS
 echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
 
+# ROS 2 dev tools.
+sudo apt install ros-dev-tools -y
+
 # For gui tools like gazebo.
-echo "export DISPLAY=:0" >> ~/.bashrc
+echo "export DISPLAY=${XDISPLAY}" >> ~/.bashrc

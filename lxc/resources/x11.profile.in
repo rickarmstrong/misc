@@ -1,5 +1,5 @@
 config:
-  environment.DISPLAY: :0
+  environment.DISPLAY: {{ DISPLAY }}
   nvidia.driver.capabilities: all
   nvidia.runtime: "true"
   user.user-data: |
@@ -11,8 +11,8 @@ description: GUI LXD profile
 devices:
   X0:
     bind: container
-    connect: unix:@/tmp/.X11-unix/X0
-    listen: unix:@/tmp/.X11-unix/X0
+    connect: unix:@/tmp/.X11-unix/{{ x11_socket }}
+    listen: unix:@/tmp/.X11-unix/{{ x11_socket }}
     security.gid: "{{ gid }}"
     security.uid: "{{ uid }}"
     type: proxy
