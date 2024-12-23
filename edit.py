@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+"""Edit a gpg-encrypted file, decrypting to a tmpfs mount. 
+Avoids leaving an unencrypted temp file laying around.
+"""
+
 import os, sys, subprocess, getpass, stat, shutil
 from encodings.cp866 import encoding_map
 
